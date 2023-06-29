@@ -1,0 +1,31 @@
+* {
+  font-family: 'Nunito', sans-serif;
+}
+.top-cont {
+  background-image: url("../assets/images/ghibli2.jpg");
+  height: 700px;
+}
+
+.name {
+  font-size: 5rem;
+  padding-top: 150px;
+}
+
+.gamer {
+  font-size: 2.5rem;
+  padding-top: 1.5rem;
+}
+
+.card-text {
+  font-size: 2rem;
+  font-weight: lighter;
+  align-self: left;
+}
+
+img {
+  border-radius: 5px;
+}
+
+.huge {
+  font-size: 10rem;
+}
