@@ -1,22 +1,59 @@
+* {
+    margin: 0;
+}
 body {
     background-color: #FAF0E4;
-    font-family: 'Cherry Bomb One', cursive;
+    font-family: 'Nunito', sans-serif;
     height: 100vh;
 }
 .container { 
-    display: block;
+    display: flex;
     justify-content: center;
+    margin-left: 10%;
+    margin-right: 10%;
+    margin-top: 20px;
 }
 
 .title-box {
     background: #9BCDD2;
     border-radius: 100px;
-    padding: 30px;
+    margin-top: 0;
 }
 
 .title {
     text-align: center;
     font-size: 5rem;
+    padding: 20px;
 }
 
+.left {
+}
 
+.box {
+    display: flex;
+}
+
+.card {
+    margin-top: 30px;
+}
+
+.nerd {
+    height: 100%;
+    margin-left: 10%;
+    margin-right: 10%;
+}
+
+.footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@media (max-width: 850px) {
+    .title {
+        font-size: 2rem;
+    }
+    h1 {
+        font-size: 1rem;
+    }
+}
