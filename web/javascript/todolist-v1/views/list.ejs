@@ -1,23 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title>WHAT DAY IS IT??</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="css/style.css" rel="stylesheet">
-    </head>
-    <body>
-        <h1><%= kindOfDay %></h1>
-        <ul>
+<%- include("header"); -%>
+        <div class="box" id="heading">
+            <h1><%= listName %></h1>
+        </div>
+        <div class="box">
             <% for (var i = 0; i < items.length; i++) {%>
-            <li><%= items[i] %></li>   
+            <div class="item">
+                <input type="checkbox">
+                <p><%= items[i] %></p>   
+            </div>
             <% } %>
-            <li>
-                <form action="/" method="post">
-                    <input name="item">
-                    <button type="submit">ADD!</button>
-                </form>
-            </li>
-        </ul>
-    </body>
-</html>
+            <form class="item" action="/" method="post">
+                <input type="text" name="item" placeholder="New item" autocomplete="off">
+                <button name="list" value=<%= listName %> type="submit">+</button>
+            </form>
+        </div>
+<%- include("footer"); -%>
