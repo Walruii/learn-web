@@ -4,35 +4,48 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 const https = require("https");
 
-app.set('view engine', 'ejs');
+const date = require(__dirname + "/date.js");
 
-var items = ["Gaming", "More Gaming"];
+app.set('view engine', 'ejs');
+app.use(express.static("public"));
+
+const items = ["Gaming", "More Gaming"];
+const workItems = [];
 
 app.get("/", function (req, res) {
 
-    var today = new Date();
-
-    var options = {
-        weekday: "long",
-        day: "numeric",
-        month: "long"
-    }
-
-    var day = today.toLocaleDateString("en-US", options);
+    day = date.getDate();
 
     res.render("list", {
-        kindOfDay: day,
+        listName: day,
         items: items,
     });
 });
 
+app.get("/about", function (req, res) {
+    res.render("about");
+})
+
+app.get("/work", function (req, res) {
+
+    res.render("list", {
+        listName: "Work List",
+        items: workItems
+    });
+});
+
 app.post("/", function (req, res) {
-    var item = req.body.item;
-    items.push(item);
-    res.redirect("/");
+    let item = req.body.item;
+    console.log(req.body);
+    if (req.body.list === "Work") {
+        workItems.push(item);
+        res.redirect("/work");
+    } else {
+        items.push(item);
+        res.redirect("/");
+    }
 });
 
 app.listen(process.env.PORT || 8000, function () {
     console.log("Listening on port 8000");
 });
-
