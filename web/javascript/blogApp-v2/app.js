@@ -1,19 +1,100 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
 const _ = require("lodash");
 const ejs = require("ejs");
 
-app.set("view engine", "ejs");
+app.engine('.html', require('ejs').__express);
+app.set("view engine", "html");
 
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
-app.get("/", (req, res) => {
-    res.send("hello");
+const postSchema = new mongoose.Schema({
+    title: {
+        type: String,
+        required: true
+    },
+    content: {
+        type: String,
+        required: true
+    }
 });
 
+const Post = mongoose.model("Post", postSchema);
 
-app.listen(process.env.PORT || 8000, () => {
-    console.log("Listening on port 8000");
+// const post = new Post({
+//     title: "hello long post",
+//     content: "hello this is a post Ladies others the six desire age. Bred am soon park past read by lain. As excuse eldest no moment. An delight beloved up garrets am cottage private. The far attachment discovered celebrated decisively surrounded for and. Sir new the particular frequently indulgence excellence how. Wishing an if he sixteen visited tedious subject it. Mind mrs yet did quit high even you went. Sex against the two however not nothing prudent colonel greater. Up husband removed parties staying he subject mr.",
+// });
+
+// post.save();
+
+app.get("/", async (req, res) => {
+
+    const posts = await Post.find();
+    res.render("home", {
+        homeStart: "A",
+        posts: posts
+    });
 });
+
+app.get("/about", async (req, res) => {
+    res.render("about", {
+        aboutContent: "A",
+    });
+});
+
+app.get("/contact", async (req, res) => {
+    res.render("contact", {
+        contactContent: "A",
+    });
+});
+
+app.get("/compose", async (req, res) => {
+    res.render("compose", {
+        contactContent: "A",
+    });
+});
+
+app.post("/compose", async (req, res) => {
+    const postTitle = req.body.postTitle;
+    const postContent = req.body.postContent;
+    const post = new Post({
+        title: postTitle,
+        content: postContent
+    });
+
+    Post.insertMany([post]);
+
+    res.redirect("/");
+});
+
+app.get("/posts/:post", async (req, res) => {
+    const postId = req.params.post;
+
+    Post.findById({ _id: postId }).then(function(post) {
+        res.render("post", {
+            post: post
+        });
+    });
+});
+
+const start = async () => {
+    try {
+
+        await mongoose.connect("mongodb://127.0.0.1:27017/BlogDB")
+
+        app.listen(process.env.PORT || 8000, async () => {
+            console.log("Listening on port 8000");
+        });
+
+    } catch (err) {
+
+        console.error(err);
+        process.exit(1);
+    }
+};
+
+start();
