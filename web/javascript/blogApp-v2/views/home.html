@@ -1,16 +1,17 @@
-<%- include("partials/header"); -%>
+<%- include("partials/header.html"); -%>
 
-<h1>Home</h1>
-<p><%= homeStart %></p>
+<h1 class="heading">Home</h1>
+<p class="post-content"><%= homeStart %></p>
+<h1 class="heading">Posts</h1>
 
 <% posts.forEach(function (post) { %>
-    <h1><%= post.title %></h1>
+    <h1 class="post-title"><%= post.title %></h1>
     <% if (post.content.length > 100) { %>
-        <p><%= post.content.slice(0, 100) %>   ... <a href="/posts/<%= post._id %>">Read More</a></p>homehome
+        <p class="post-content"><%= post.content.slice(0, 100) %>   ... <a href="/posts/<%= post._id %>">Read More</a>
     <% } else { %>
-        <p><%= post.content %></p>
+        <p class="post-content"><%= post.content %></p>
 
 <% }}) %>
 
 
-<%- include("partials/footer"); -%>
+<%- include("partials/footer.html"); -%>

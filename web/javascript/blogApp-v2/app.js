@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const _ = require("lodash");
 const ejs = require("ejs");
+const text = require(__dirname + "/text.js")
 
 app.engine('.html', require('ejs').__express);
 app.set("view engine", "html");
@@ -35,27 +36,25 @@ app.get("/", async (req, res) => {
 
     const posts = await Post.find();
     res.render("home", {
-        homeStart: "A",
+        homeStart: text.homeContent,
         posts: posts
     });
 });
 
 app.get("/about", async (req, res) => {
     res.render("about", {
-        aboutContent: "A",
+        aboutContent: text.aboutContent,
     });
 });
 
 app.get("/contact", async (req, res) => {
     res.render("contact", {
-        contactContent: "A",
+        contactContent: text.contactContent,
     });
 });
 
 app.get("/compose", async (req, res) => {
-    res.render("compose", {
-        contactContent: "A",
-    });
+    res.render("compose");
 });
 
 app.post("/compose", async (req, res) => {
@@ -66,19 +65,32 @@ app.post("/compose", async (req, res) => {
         content: postContent
     });
 
-    Post.insertMany([post]);
+    try {
+        const postadd = await Post.insertMany([post]);
+    } catch (err) {
+        console.error(err);
+    }
 
     res.redirect("/");
 });
 
+app.get("/invalid", async (req, res) => {
+    res.render("invalid")
+});
+
 app.get("/posts/:post", async (req, res) => {
     const postId = req.params.post;
-
-    Post.findById({ _id: postId }).then(function(post) {
-        res.render("post", {
-            post: post
+    try {
+        const find = await Post.findById({ _id: postId }).then(function(post) {
+            res.render("post", {
+                post: post
+            });
         });
-    });
+    } catch (err) {
+        console.error(err);
+        res.redirect("/invalid");
+    }
+
 });
 
 const start = async () => {
