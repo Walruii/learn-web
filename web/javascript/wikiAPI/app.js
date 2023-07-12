@@ -74,6 +74,7 @@ app.route("/articles/:article")
 
 
         } catch (err) {
+            console.error(err);
             res.send(err);
         }
     })
@@ -83,15 +84,14 @@ app.route("/articles/:article")
             await Article.findOneAndReplace(
                 { title: req.params.article },
                 { title: req.body.title, content: req.body.content },
-            )
-                .then((response) => {
-                    if (!response) {
-                        res.send("NOT FOUND");
-                    } else {
-                        res.send("UPDATED!");
-                    }
+            ).then((response) => {
+                if (!response) {
+                    res.send("NOT FOUND");
+                } else {
+                    res.send("UPDATED!");
+                }
 
-                });
+            });
 
         } catch (err) {
             res.send(err);
@@ -104,15 +104,14 @@ app.route("/articles/:article")
             await Article.findOneAndUpdate(
                 { title: req.params.article },
                 { title: req.body.title, content: req.body.content },
-            )
-                .then((response) => {
-                    if (!response) {
-                        res.send("Not Found!");
-                    } else {
-                        res.send("updated!");
-                    }
+            ).then((response) => {
+                if (!response) {
+                    res.send("Not Found!");
+                } else {
+                    res.send("updated!");
+                }
 
-                });
+            });
 
         } catch (err) {
             res.send(err);
