@@ -81,17 +81,16 @@ app.route("/articles/:article")
 
     .put(async (req, res) => {
         try {
-            await Article.findOneAndReplace(
+            const response = await Article.findOneAndReplace(
                 { title: req.params.article },
                 { title: req.body.title, content: req.body.content },
-            ).then((response) => {
-                if (!response) {
-                    res.send("NOT FOUND");
-                } else {
-                    res.send("UPDATED!");
-                }
+            )
 
-            });
+            if (!response) {
+                res.send("NOT FOUND");
+            } else {
+                res.send("UPDATED!");
+            }
 
         } catch (err) {
             res.send(err);
@@ -101,17 +100,16 @@ app.route("/articles/:article")
     .patch(async (req, res) => {
 
         try {
-            await Article.findOneAndUpdate(
+            const responset = await Article.findOneAndUpdate(
                 { title: req.params.article },
                 { title: req.body.title, content: req.body.content },
-            ).then((response) => {
-                if (!response) {
-                    res.send("Not Found!");
-                } else {
-                    res.send("updated!");
-                }
+            )
 
-            });
+            if (!response) {
+                res.send("Not Found!");
+            } else {
+                res.send("updated!");
+            }
 
         } catch (err) {
             res.send(err);
@@ -122,15 +120,14 @@ app.route("/articles/:article")
     .delete(async (req, res) => {
 
         try {
-            await Article.findOneAndDelete({ title: req.params.article })
-                .then((response) => {
-                    if (!response) {
-                        res.send("not found");
-                    } else {
-                        res.send("deleted!");
-                    }
+            const response = await Article.findOneAndDelete({ title: req.params.article })
 
-                });
+            if (!response) {
+                res.send("not found");
+            } else {
+                res.send("deleted!");
+            }
+
 
         } catch (err) {
             res.send(err);
