@@ -1,26 +1,25 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const ejs = require("ejs");
+const express = require('express');
+const bodyParser = require('body-parser');
+const ejs = require('ejs');
 const app = express();
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 app.engine('.html', require('ejs').__express);
 app.set('view engine', 'html');
 
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static("public"));
+app.use(express.static('public'));
 
 const articleSchema = {
     title: String,
     content: String
 };
 
-const Article = new mongoose.model("Article", articleSchema);
+const Article = new mongoose.model('Article', articleSchema);
 
-app.route("/articles")
+app.route('/articles')
     .get(async (req, res) => {
         try {
-
             const articles = await Article.find();
             res.send(articles);
 
@@ -63,7 +62,7 @@ app.route("/articles")
         }
     });
 
-app.route("/articles/:article")
+app.route('/articles/:article')
     .get(async (req, res) => {
 
         const articleTitle = req.params.article;
@@ -87,9 +86,9 @@ app.route("/articles/:article")
             )
 
             if (!response) {
-                res.send("NOT FOUND");
+                res.send('NOT FOUND');
             } else {
-                res.send("UPDATED!");
+                res.send('UPDATED!');
             }
 
         } catch (err) {
@@ -100,15 +99,15 @@ app.route("/articles/:article")
     .patch(async (req, res) => {
 
         try {
-            const responset = await Article.findOneAndUpdate(
+            const response = await Article.findOneAndUpdate(
                 { title: req.params.article },
                 { title: req.body.title, content: req.body.content },
             )
 
             if (!response) {
-                res.send("Not Found!");
+                res.send('Not Found!');
             } else {
-                res.send("updated!");
+                res.send('updated!');
             }
 
         } catch (err) {
@@ -123,9 +122,9 @@ app.route("/articles/:article")
             const response = await Article.findOneAndDelete({ title: req.params.article })
 
             if (!response) {
-                res.send("not found");
+                res.send('not found');
             } else {
-                res.send("deleted!");
+                res.send('deleted!');
             }
 
 
@@ -138,10 +137,10 @@ app.route("/articles/:article")
 const start = async () => {
     try {
 
-        await mongoose.connect("mongodb://127.0.0.1:27017/wikiDB");
+        await mongoose.connect('mongodb://127.0.0.1:27017/wikiDB');
 
         app.listen(8000, async () => {
-            console.log("Listening on port 8000");
+            console.log('Listening on port 8000');
         });
 
     } catch (err) {
