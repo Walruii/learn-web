@@ -1,10 +1,15 @@
 
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const ejs = require('ejs');
 const app = express();
-const encrypt = require('mongoose-encryption');
+const session = require('express-session');
+const passport = require('passport');
+const passportLocalMongoose = require('passport-local-mongoose');
+const GoogleStrategy = require('passport-google-oauth2').Strategy;
+const findOrCreate = require('mongoose-findorcreate');
 
 app.engine('.html', require('ejs').__express);
 app.set('view engine', 'html');
@@ -12,15 +17,43 @@ app.set('view engine', 'html');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-const userSchema = new mongoose.Schema ({
+app.use(session({
+    secret: "lilSecret",
+    resave: false,
+    saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+const userSchema = new mongoose.Schema({
     email: String,
     password: String
 });
 
-const secret = 'Youreallythoughtyoudgetthroughthis';
-userSchema.plugin(encrypt, {secret: secret, encryptedFields: ['password']});
+userSchema.plugin(passportLocalMongoose);
+// userSchema.plugin(findOrCreate);
 
 const User = new mongoose.model('User', userSchema);
+
+passport.use(User.createStrategy());
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+// passport.use(new GoogleStrategy({
+//     clientID: process.env.CLIENT_ID,
+//     clientSecret: process.env.CLIENT_SECRET,
+//     callbackURL: "http://localhost:3000/auth/google/secrets",
+//     usrProfileURL: 'https://www.googleapis.com/oauth2/v3/userinfo',
+//     passReqToCallback: true
+// },
+//     function(request, accessToken, refreshToken, profile, done) {
+//         User.findOrCreate({ googleId: profile.id }, function(err, user) {
+//             return done(err, user);
+//         });
+//     }
+// ));
 
 app.get('/', async (req, res) => {
 
@@ -32,52 +65,68 @@ app.get('/register', async (req, res) => {
     res.render('register');
 });
 
-app.post('/register', async (req, res) => {
-
-    const username = req.body.username;
-    const password = req.body.password;
-
-    const user = new User({
-        email: username,
-        password: password
-    });
-    try {
-        await user.save();
+app.get('/secrets', async (req, res) => {
+    if (req.isAuthenticated()) {
         res.render('secrets');
-
-    } catch (err) {
-
-        console.log(err);
-        res.redirect('/');
+    } else {
+        res.redirect('/login');
     }
 });
+
+app.post('/register', async (req, res) => {
+
+    try {
+        const register = await User.register({ username: req.body.username }, req.body.password);
+        if (!register) {
+            console.log(register);
+        } else {
+            passport.authenticate('local')(req, res, () => res.redirect('/secrets'));
+        }
+
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+
 app.get('/login', async (req, res) => {
 
     res.render('login');
 });
 
+app.get('/logout', async (req, res) => {
+    req.logout((err) => {
+        if (err) { console.log(err); }
+        res.redirect('/');
+    });
+});
+
 app.post('/login', async (req, res) => {
 
-    const username = req.body.username;
-    const password = req.body.password;
+    const user = new User({
+        username: req.body.username,
+        passport: req.body.password
+    })
 
-    try {
-
-        const user = await User.findOne({ email: username });
-        if (!user) {
-            console.log('usr Not found');
-            res.redirect('/');
-        } else if (user.password === password) {
-            res.render('secrets');
+    req.login(user, (err) => {
+        if (err) {
+            console.log(err);
         } else {
-            res.redirect('/');
+            passport.authenticate('local')(req, res, () => res.redirect('/secrets'));
         }
-
-    } catch (err) {
-        console.error(err);
-        res.redirect('/');
-    }
+    });
 });
+
+// app.get('/auth/google', passport.authorize('google', { scope: ['email', 'profile'] }));
+
+// app.get( '/auth/google/secrets',
+//     passport.authenticate( 'google', {
+//         successRedirect: '/secrets',
+//         failureRedirect: '/login'
+// }));
+
+
+
 const start = async () => {
     try {
 
