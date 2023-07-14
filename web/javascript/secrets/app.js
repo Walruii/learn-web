@@ -27,7 +27,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 const userSchema = new mongoose.Schema({
-    email: String,
+    username: String,
     password: String
 });
 
@@ -80,7 +80,7 @@ app.post('/register', async (req, res) => {
         if (!register) {
             console.log(register);
         } else {
-            return res.redirect('/secrets');
+            passport.authenticate('local')(req, res, () => res.redirect('/secrets'));
         }
 
     } catch (error) {
