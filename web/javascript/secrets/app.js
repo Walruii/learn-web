@@ -8,8 +8,14 @@ const app = express();
 const session = require('express-session');
 const passport = require('passport');
 const passportLocalMongoose = require('passport-local-mongoose');
-const GoogleStrategy = require('passport-google-oauth2').Strategy;
 const findOrCreate = require('mongoose-findorcreate');
+const GoogleStrategy = require('passport-google-oauth2').Strategy;
+const FacebookStrategy = require('passport-facebook').Strategy;
+const fs = require('fs');
+const key = fs.readFileSync('./key.pem');
+const cert = fs.readFileSync('./cert.pem');
+const https = require('https');
+const server = https.createServer({ key: key, cert: cert }, app);
 
 app.engine('.html', require('ejs').__express);
 app.set('view engine', 'html');
@@ -28,7 +34,10 @@ app.use(passport.session());
 
 const userSchema = new mongoose.Schema({
     username: String,
-    password: String
+    password: String,
+    googleId: String,
+    facebookId: String,
+    secret: String
 });
 
 userSchema.plugin(passportLocalMongoose);
@@ -38,8 +47,15 @@ const User = new mongoose.model('User', userSchema);
 
 passport.use(User.createStrategy());
 
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+
+passport.serializeUser(function(user, done) {
+    done(null, user);
+});
+
+passport.deserializeUser(function(user, done) {
+    done(null, user);
+});
+
 
 passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
@@ -55,6 +71,18 @@ passport.use(new GoogleStrategy({
     }
 ));
 
+passport.use(new FacebookStrategy({
+    clientID: process.env.FACEBOOK_APP_ID,
+    clientSecret: process.env.FACEBOOK_APP_SECRET,
+    callbackURL: "http://localhost:3000/auth/facebook/callback"
+},
+    function(accessToken, refreshToken, profile, cb) {
+        User.findOrCreate({ facebookId: profile.id }, function(err, user) {
+            return cb(err, user);
+        });
+    }
+));
+
 app.get('/', async (req, res) => {
 
     res.render('home');
@@ -66,11 +94,11 @@ app.get('/register', async (req, res) => {
 });
 
 app.get('/secrets', async (req, res) => {
-    if (req.isAuthenticated()) {
-        res.render('secrets');
-    } else {
-        res.redirect('/login');
+    const users = await User.find({'secret': {$ne: null}});
+    if (users) {
+        res.render('secrets', {userss: users});
     }
+
 });
 
 app.post('/register', async (req, res) => {
@@ -117,22 +145,62 @@ app.post('/login', async (req, res) => {
     });
 });
 
-app.get('/auth/google', passport.authorize('google', { scope: ['email', 'profile'] }));
+app.get('/auth/facebook', passport.authorize('facebook'));
 
-app.get( '/auth/google/secrets',
-    passport.authenticate( 'google', {
+app.get('/auth/facebook/callback',
+    passport.authenticate('facebook', {
         successRedirect: '/secrets',
         failureRedirect: '/login'
-}));
+    }));
 
 
+app.get('/auth/google', passport.authorize('google', { scope: ['profile'] }));
+
+app.get('/auth/google/secrets',
+    passport.authenticate('google', {
+        successRedirect: '/secrets',
+        failureRedirect: '/login'
+    }));
+
+app.get('/submit', async (req, res) => {
+
+    if (req.isAuthenticated()) {
+        res.render('submit');
+    } else {
+        res.redirect('/login');
+    }
+
+});
+
+app.post('/submit', async (req, res) => {
+
+    const submittedSecret = req.body.secret;
+    try {
+
+        const user = await User.findById({ _id: req.user._id });
+        if (!user) {
+            console.log(user);
+        } else {
+            user.secret = submittedSecret;
+            try {
+                await user.save();
+                res.redirect('/secrets');
+            } catch (error) {
+                console.log(error);
+            }
+        }
+    } catch (error) {
+        console.log(error);
+    }
+
+});
 
 const start = async () => {
     try {
 
         await mongoose.connect('mongodb://127.0.0.1:27017/userDB');
-        app.listen(8000, () => {
-            console.log('Listening on 8000');
+        app.listen(3000, () => {
+            console.log('Listening on 3000');
         });
     } catch (err) {
         console.error(err);
