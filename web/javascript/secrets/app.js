@@ -103,6 +103,7 @@ app.get('/about', async (req, res) => {
 
 // Setting up the secrets page that will display the secrets 
 app.get('/secrets', async (req, res) => {
+
     const users = await User.find({ 'secret': { $ne: null } });
     if (users) {
         res.render('secrets', { userss: users });
@@ -160,6 +161,7 @@ app.post('/login', async (req, res) => {
 // Setting up the logout that will remove the session of the login from the 
 // browser and the user will be no longer logged in
 app.get('/logout', async (req, res) => {
+
     req.logout((err) => {
         if (err) { console.log(err); }
         res.redirect('/');
@@ -206,6 +208,7 @@ app.post('/submit', async (req, res) => {
 app.get('/auth/facebook', passport.authorize('facebook'));
 
 app.get('/auth/facebook/callback',
+
     passport.authenticate('facebook', {
         successRedirect: '/secrets',
         failureRedirect: '/login'
@@ -215,6 +218,7 @@ app.get('/auth/facebook/callback',
 app.get('/auth/google', passport.authorize('google', { scope: ['profile'] }));
 
 app.get('/auth/google/secrets',
+
     passport.authenticate('google', {
         successRedirect: '/secrets',
         failureRedirect: '/login'
@@ -229,6 +233,7 @@ const start = async () => {
             console.log('Listening on 3000');
         });
     } catch (err) {
+
         console.error(err);
         process.exit(1);
     }
