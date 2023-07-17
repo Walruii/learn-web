@@ -1,4 +1,3 @@
-
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -11,11 +10,6 @@ const passportLocalMongoose = require('passport-local-mongoose');
 const findOrCreate = require('mongoose-findorcreate');
 const GoogleStrategy = require('passport-google-oauth2').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
-const fs = require('fs');
-const key = fs.readFileSync('./key.pem');
-const cert = fs.readFileSync('./cert.pem');
-const https = require('https');
-const server = https.createServer({ key: key, cert: cert }, app);
 
 app.engine('.html', require('ejs').__express);
 app.set('view engine', 'html');
@@ -86,6 +80,11 @@ passport.use(new FacebookStrategy({
 app.get('/', async (req, res) => {
 
     res.render('home');
+});
+
+app.get('/about', async(req, res) => {
+    
+    res.render('about');
 });
 
 app.get('/register', async (req, res) => {
