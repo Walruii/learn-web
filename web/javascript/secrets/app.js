@@ -11,12 +11,17 @@ const findOrCreate = require('mongoose-findorcreate');
 const GoogleStrategy = require('passport-google-oauth2').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
 
+// Setting the view engine to ejs that takes .html extention
 app.engine('.html', require('ejs').__express);
 app.set('view engine', 'html');
 
+// Setting up bodyParser to work with express
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Adding static pages folder for express
 app.use(express.static('public'));
 
+// Setting up sessions with express that store user login
 app.use(session({
     secret: "lilSecret",
     resave: false,
@@ -26,6 +31,8 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Setting up the Schema for the users that will store the email,
+// password, secrets and optionally the googleId or the FacebookId
 const userSchema = new mongoose.Schema({
     username: String,
     password: String,
@@ -34,6 +41,8 @@ const userSchema = new mongoose.Schema({
     secret: String
 });
 
+// Setting up plugins for mongodb to work with mongoose passport local and
+// findOrCreate plugin that will make saving googleId and facebookId easy
 userSchema.plugin(passportLocalMongoose);
 userSchema.plugin(findOrCreate);
 
@@ -41,7 +50,7 @@ const User = new mongoose.model('User', userSchema);
 
 passport.use(User.createStrategy());
 
-
+// Serializing and Deserializing user to save the login and log them out
 passport.serializeUser(function(user, done) {
     done(null, user);
 });
@@ -51,6 +60,7 @@ passport.deserializeUser(function(user, done) {
 });
 
 
+// Setting up OAuth with Google API to get the user info
 passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
@@ -65,6 +75,7 @@ passport.use(new GoogleStrategy({
     }
 ));
 
+// Setting up OAuth with Facebook API to get the user info
 passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
@@ -77,28 +88,34 @@ passport.use(new FacebookStrategy({
     }
 ));
 
+// Creating routes for home and about me page
 app.get('/', async (req, res) => {
 
     res.render('home');
 });
 
-app.get('/about', async(req, res) => {
-    
+
+app.get('/about', async (req, res) => {
+
     res.render('about');
 });
 
-app.get('/register', async (req, res) => {
 
-    res.render('register');
-});
-
+// Setting up the secrets page that will display the secrets 
 app.get('/secrets', async (req, res) => {
-    const users = await User.find({'secret': {$ne: null}});
+    const users = await User.find({ 'secret': { $ne: null } });
     if (users) {
-        res.render('secrets', {userss: users});
+        res.render('secrets', { userss: users });
     }
 
 });
+
+
+// Setting up the local registering method the hashs the password and salts it
+app.get('/register', async (req, res) => {
+
+    res.render('register');
+})
 
 app.post('/register', async (req, res) => {
 
@@ -116,17 +133,12 @@ app.post('/register', async (req, res) => {
 });
 
 
+// Setting up the local login that was hash and salt the given password the 
+// same way and check it against the stored password
 app.get('/login', async (req, res) => {
 
     res.render('login');
-});
-
-app.get('/logout', async (req, res) => {
-    req.logout((err) => {
-        if (err) { console.log(err); }
-        res.redirect('/');
-    });
-});
+})
 
 app.post('/login', async (req, res) => {
 
@@ -139,27 +151,21 @@ app.post('/login', async (req, res) => {
         if (err) {
             console.log(err);
         } else {
-            passport.authenticate('local')(req, res, () => res.redirect('/secrets'));
+            passport.authenticate('local', { failureRedirect: '/', failureMessage: true })(req, res, () => res.redirect('/secrets'));
         }
     });
 });
 
-app.get('/auth/facebook', passport.authorize('facebook'));
 
-app.get('/auth/facebook/callback',
-    passport.authenticate('facebook', {
-        successRedirect: '/secrets',
-        failureRedirect: '/login'
-    }));
+// Setting up the logout that will remove the session of the login from the 
+// browser and the user will be no longer logged in
+app.get('/logout', async (req, res) => {
+    req.logout((err) => {
+        if (err) { console.log(err); }
+        res.redirect('/');
+    });
+});
 
-
-app.get('/auth/google', passport.authorize('google', { scope: ['profile'] }));
-
-app.get('/auth/google/secrets',
-    passport.authenticate('google', {
-        successRedirect: '/secrets',
-        failureRedirect: '/login'
-    }));
 
 app.get('/submit', async (req, res) => {
 
@@ -194,6 +200,27 @@ app.post('/submit', async (req, res) => {
 
 });
 
+
+// Routing the facebook and google authentication that if successful will
+// provide us will the ids or will shout unauthorized
+app.get('/auth/facebook', passport.authorize('facebook'));
+
+app.get('/auth/facebook/callback',
+    passport.authenticate('facebook', {
+        successRedirect: '/secrets',
+        failureRedirect: '/login'
+    }));
+
+
+app.get('/auth/google', passport.authorize('google', { scope: ['profile'] }));
+
+app.get('/auth/google/secrets',
+    passport.authenticate('google', {
+        successRedirect: '/secrets',
+        failureRedirect: '/login'
+    }));
+
+// Starting the server with local host and listening to port 3000
 const start = async () => {
     try {
 
