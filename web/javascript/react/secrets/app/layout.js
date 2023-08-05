@@ -1,4 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faEnvelope } from '@fortawesome/free-solid-svg-icons'
 import './globals.css';
 
 import Header from '../components/Header';
