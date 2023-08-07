@@ -6,7 +6,8 @@ export async function GET(request) {
   try {
     console.log('CONNECTING TO MONGO');
     const connect = await connectMongo();
-    console.log('CONNECTED TO MONGO');
+    if (connect)
+      console.log('CONNECTED TO MONGO');
     const users = await User.find({ 'secret': { $ne: null } })
     return NextResponse.json({ users });
   } catch (error) {
