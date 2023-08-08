@@ -1,10 +1,11 @@
-import Card from "../Card"
-import Form from "../Form"
+import Card from '../Card';
+import Form from '../Form'
 
-export default function Login() {
+
+export default function Register() {
   return (
     <div className="container mt-5">
-      <h1>Login</h1>
+      <h1>Register</h1>
 
       <div className="row">
         <div className="col-sm-8">
@@ -15,12 +16,10 @@ export default function Login() {
 
         <div className="col-sm-4">
           <Card cardName="Facebook" href="/auth/facebook" />
-          <Card cardName="Github" href="/api/auth/signin" />
           <Card cardName="Google" href="/auth/google" />
         </div>
 
       </div>
     </div>
-
   );
 }
