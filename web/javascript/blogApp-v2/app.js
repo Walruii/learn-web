@@ -98,8 +98,8 @@ const start = async () => {
 
         await mongoose.connect("mongodb://127.0.0.1:27017/BlogDB")
 
-        app.listen(process.env.PORT || 8000, async () => {
-            console.log("Listening on port 8000");
+        app.listen(process.env.PORT || 3000, async () => {
+            console.log("Listening on port 3000");
         });
 
     } catch (err) {
