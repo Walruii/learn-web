@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
@@ -96,7 +97,7 @@ app.get("/posts/:post", async (req, res) => {
 const start = async () => {
     try {
 
-        await mongoose.connect("mongodb://127.0.0.1:27017/BlogDB")
+        await mongoose.connect(process.env.MONGO_URI)
 
         app.listen(process.env.PORT || 3000, async () => {
             console.log("Listening on port 3000");
