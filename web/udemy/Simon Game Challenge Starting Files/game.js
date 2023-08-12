@@ -3,6 +3,7 @@ var gamePattern = [];
 var userPattern = [];
 var levelNumber = 0;
 var started = false;
+
 function nextSequence() {
     $("#level-title").text("Level " + levelNumber);
     var randomNumber = Math.floor(Math.random()*3);
@@ -14,6 +15,7 @@ function nextSequence() {
     levelNumber++;
     userPattern = [];
 }
+
 $(document).on("keypress", function (event) { 
     if (event.key === "a" && started != true) {
         started = true;
