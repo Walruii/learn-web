@@ -1,7 +1,9 @@
 import inquirer from 'inquirer';
 import qr from "qr-image";
 import fs from "fs";
+
 var input;
+
 inquirer
     .prompt([
         {message: "Type URL: ",
@@ -27,4 +29,5 @@ inquirer
             console.log("error")
         }
     });
+
 
