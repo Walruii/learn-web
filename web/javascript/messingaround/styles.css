@@ -1,0 +1,49 @@
+body {
+  background: black;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Space Mono', monospace;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes slide {
+  from {
+    transform: translateX(-300px);
+  }
+  to {
+    transform: translateX(0px);
+  }
+}
+
+.spin {
+  animation: spin 1s ease-in-out 0s 1 normal;
+}
+
+.slide {
+  animation: slide 1s ease-in-out 0s 1 normal;
+  animation-fill-mode: none;
+}
+
+.heading {
+  color: white;
+  font-size: 4rem;
+
+}
+
+#blob {
+  background-color: white;
+  height: 500px;
+  aspect-ratio: 1;
+  position: absolute;
+}
